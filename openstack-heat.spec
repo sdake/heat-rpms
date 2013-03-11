@@ -14,7 +14,9 @@ Release:        0.5.%{release_letter}%{milestone}%{?dist}
 License:        ASL 2.0
 Group:          System Environment/Base
 URL:            http://heat-api.org/
-Source0:         http://launchpad.net/heat/%{release_name}/%{version}/+download/heat-%{version}.%{release_letter}%{milestone}.tar.gz
+Source0:        http://launchpad.net/heat/%{release_name}/%{version}/+download/heat-%{version}.%{release_letter}%{milestone}.tar.gz
+Obsoletes:	heat
+Provides:	heat
 
 Source1:	heat.logrotate
 Source2:	openstack-heat-api.service
