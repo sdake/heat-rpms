@@ -1,35 +1,42 @@
-Name: heat
-Summary: This software provides cloud orchestration functionality for OpenStack Grizzly
-Version: %{?_version}
-Release: %{?_release}%{?dist}
-License: ASL 2.0
-Group: System Environment/Base
-URL: http://heat-api.org
-Source0: https://github.com/downloads/heat-api/heat/heat-%{version}.tar.gz
-Source1: heat.logrotate
-Source2: heat-api.service
-Source3: heat-api-cfn.service
-Source4: heat-engine.service
-Source5: heat-api-cloudwatch.service
+#
+# This is 2013.1 grizzly-3 milestone
+#
+%global release_name grizzly
+%global release_letter g
+%global milestone 3
 
-# fedora specific patches commented out
-#Patch0: switch-to-using-m2crypto.patch
+%global with_doc %{!?_without_doc:1}%{?_without_doc:0}
+
+Name: 		openstack-heat
+Summary:	OpenStack Orchestration (heat)
+Version:        2013.1
+Release:        0.5.%{release_letter}%{milestone}%{?dist}
+License:        ASL 2.0
+Group:          System Environment/Base
+URL:            http://heat-api.org/
+Source0:         http://launchpad.net/heat/%{release_name}/%{version}/+download/heat-%{version}.%{release_letter}%{milestone}.tar.gz
+
+Source1:	heat.logrotate
+Source2:	openstack-heat-api.service
+Source3:	openstack-heat-api-cfn.service
+Source4:	openstack-heat-engine.service
+Source5:	openstack-heat-api-cloudwatch.service
 
 BuildArch: noarch
 BuildRequires: python2-devel
 BuildRequires: python-setuptools
 BuildRequires: python-sphinx
+BuildRequires: systemd-units
 
 Requires: %{name}-common = %{version}-%{release}
 Requires: %{name}-engine = %{version}-%{release}
 Requires: %{name}-api = %{version}-%{release}
-Requires: %{name}-cfn-api = %{version}-%{release}
-Requires: %{name}-cloudwatch-api = %{version}-%{release}
-Requires: %{name}-clients = %{version}-%{release}
+Requires: %{name}-api-cfn = %{version}-%{release}
+Requires: %{name}-api-cloudwatch = %{version}-%{release}
+Requires: %{name}-cli = %{version}-%{release}
 
 %prep
-%setup -q
-#%%patch0 -p1
+%setup -q -n heat-%{version}.%{release_letter}%{milestone}dev
 
 %build
 %{__python} setup.py build
@@ -43,10 +50,10 @@ mkdir -p %{buildroot}/var/log/heat/
 install -p -D -m 644 %{SOURCE1} %{buildroot}%{_sysconfdir}/logrotate.d/heat
 
 # install systemd unit files
-install -p -D -m 644 %{SOURCE2} %{buildroot}%{_unitdir}/heat-api.service
-install -p -D -m 644 %{SOURCE3} %{buildroot}%{_unitdir}/heat-api-cfn.service
-install -p -D -m 644 %{SOURCE4} %{buildroot}%{_unitdir}/heat-engine.service
-install -p -D -m 644 %{SOURCE5} %{buildroot}%{_unitdir}/heat-api-cloudwatch.service
+install -p -D -m 644 %{SOURCE2} %{buildroot}%{_unitdir}/openstack-heat-api.service
+install -p -D -m 644 %{SOURCE3} %{buildroot}%{_unitdir}/openstack-heat-api-cfn.service
+install -p -D -m 644 %{SOURCE4} %{buildroot}%{_unitdir}/openstack-heat-engine.service
+install -p -D -m 644 %{SOURCE5} %{buildroot}%{_unitdir}/openstack-heat-api-cloudwatch.service
 
 mkdir -p %{buildroot}/var/lib/heat/
 mkdir -p %{buildroot}/etc/heat/
@@ -61,16 +68,17 @@ install -p -D -m 644 build/man/*.1 %{buildroot}%{_mandir}/man1/
 popd
 
 rm -rf %{buildroot}/var/lib/heat/.dummy
+rm -f %{buildroot}/usr/bin/cinder-keystone-setup
 
-install -p -D -m 644 %{_builddir}/%{name}-%{version}/etc/heat/heat-api.conf %{buildroot}/%{_sysconfdir}/heat
-install -p -D -m 644 %{_builddir}/%{name}-%{version}/etc/heat/heat-api-paste.ini %{buildroot}/%{_sysconfdir}/heat
-install -p -D -m 644 %{_builddir}/%{name}-%{version}/etc/heat/heat-api-cfn.conf %{buildroot}/%{_sysconfdir}/heat
-install -p -D -m 644 %{_builddir}/%{name}-%{version}/etc/heat/heat-api-cfn-paste.ini %{buildroot}/%{_sysconfdir}/heat
-install -p -D -m 644 %{_builddir}/%{name}-%{version}/etc/heat/heat-api-cloudwatch.conf %{buildroot}/%{_sysconfdir}/heat
-install -p -D -m 644 %{_builddir}/%{name}-%{version}/etc/heat/heat-api-cloudwatch-paste.ini %{buildroot}/%{_sysconfdir}/heat
-install -p -D -m 644 %{_builddir}/%{name}-%{version}/etc/heat/heat-engine.conf %{buildroot}/%{_sysconfdir}/heat
-install -p -D -m 644 %{_builddir}/%{name}-%{version}/etc/boto.cfg %{buildroot}/%{_sysconfdir}/heat
-install -p -D -m 644 %{_builddir}/%{name}-%{version}/etc/bash_completion.d/heat-cfn %{buildroot}/%{_sysconfdir}/bash_completion.d/heat-cfn
+install -p -D -m 640 %{_builddir}/heat-%{version}.%{release_letter}%{milestone}dev/etc/heat/heat-api.conf %{buildroot}/%{_sysconfdir}/heat
+install -p -D -m 640 %{_builddir}/heat-%{version}.%{release_letter}%{milestone}dev/etc/heat/heat-api-paste.ini %{buildroot}/%{_sysconfdir}/heat
+install -p -D -m 640 %{_builddir}/heat-%{version}.%{release_letter}%{milestone}dev/etc/heat/heat-api-cfn.conf %{buildroot}/%{_sysconfdir}/heat
+install -p -D -m 640 %{_builddir}/heat-%{version}.%{release_letter}%{milestone}dev/etc/heat/heat-api-cfn-paste.ini %{buildroot}/%{_sysconfdir}/heat
+install -p -D -m 640 %{_builddir}/heat-%{version}.%{release_letter}%{milestone}dev/etc/heat/heat-api-cloudwatch.conf %{buildroot}/%{_sysconfdir}/heat
+install -p -D -m 640 %{_builddir}/heat-%{version}.%{release_letter}%{milestone}dev/etc/heat/heat-api-cloudwatch-paste.ini %{buildroot}/%{_sysconfdir}/heat
+install -p -D -m 640 %{_builddir}/heat-%{version}.%{release_letter}%{milestone}dev/etc/heat/heat-engine.conf %{buildroot}/%{_sysconfdir}/heat
+install -p -D -m 640 %{_builddir}/heat-%{version}.%{release_letter}%{milestone}dev/etc/boto.cfg %{buildroot}/%{_sysconfdir}/heat
+install -p -D -m 644 %{_builddir}/heat-%{version}.%{release_letter}%{milestone}dev/etc/bash_completion.d/heat-cfn %{buildroot}/%{_sysconfdir}/bash_completion.d/heat-cfn
 
 %description
 Heat provides AWS CloudFormation and CloudWatch functionality for OpenStack.
@@ -97,7 +105,6 @@ Requires: python-routes
 Requires: pysendfile
 Requires: python-sqlalchemy
 Requires: python-webob
-#Requires: m2crypto
 
 Requires(pre): shadow-utils
 
@@ -109,18 +116,18 @@ Components common to all OpenStack Heat services
 %{_bindir}/heat-db-setup
 %{_bindir}/heat-keystone-setup
 %{python_sitelib}/heat*
-%dir %attr(0755,openstack-heat,root) %{_localstatedir}/log/heat
-%dir %attr(0755,openstack-heat,root) %{_localstatedir}/lib/heat
-%dir %{_sysconfdir}/heat
+%dir %attr(0755,heat,root) %{_localstatedir}/log/heat
+%dir %attr(0755,heat,root) %{_sharedstatedir}/heat
+%dir %attr(0755,heat,root) %{_sysconfdir}/heat
 %config(noreplace) %{_sysconfdir}/logrotate.d/heat
 
 %pre common
-getent group openstack-heat >/dev/null || groupadd -r openstack-heat
-getent passwd openstack-heat  >/dev/null || \
-useradd -r -g openstack-heat -d %{_localstatedir}/lib/heat -s /sbin/nologin \
-    -c "OpenStack Heat Daemon" openstack-heat
+# 187:187 for heat - rhbz#845078
+getent group heat >/dev/null || groupadd -r --gid 187 heat
+getent passwd heat  >/dev/null || \
+useradd --uid 187 -r -g heat -d %{_sharedstatedir}/heat -s /sbin/nologin \
+-c "OpenStack Heat Daemons" heat
 exit 0
-
 
 %package engine
 Summary: The Heat engine
@@ -138,18 +145,18 @@ OpenStack API for starting CloudFormation templates on OpenStack
 %files engine
 %doc README.rst LICENSE doc/build/html/man/heat-engine.html
 %{_bindir}/heat-engine
-%config(noreplace) %attr(-,root,openstack-heat) %{_sysconfdir}/heat/heat-engine.conf
-%{_unitdir}/heat-engine.service
+%config(noreplace) %attr(-,root,heat) %{_sysconfdir}/heat/heat-engine.conf
+%{_unitdir}/openstack-heat-engine.service
 %{_mandir}/man1/heat-engine.1.gz
 
 %post engine
-%systemd_post heat-engine.service
+%systemd_post openstack-heat-engine.service
 
 %preun engine
-%systemd_preun heat-engine.service
+%systemd_preun openstack-heat-engine.service
 
 %postun engine
-%systemd_postun_with_restart heat-engine-cfn.service
+%systemd_postun_with_restart openstack-heat-engine.service
 
 
 %package api
@@ -166,24 +173,24 @@ Requires(postun): systemd
 OpenStack-native ReST API to the Heat Engine
 
 %files api
-%doc README.rst LICENSE doc/build/man/heat-api.1
+%doc README.rst LICENSE doc/build/html/man/heat-api.html
 %{_bindir}/heat-api
-%config(noreplace) %attr(-,root,openstack-heat) %{_sysconfdir}/heat/heat-api.conf
-%config(noreplace) %attr(-,root,openstack-heat) %{_sysconfdir}/heat/heat-api-paste.ini
-%{_unitdir}/heat-api.service
+%config(noreplace) %attr(-,root,heat) %{_sysconfdir}/heat/heat-api.conf
+%config(noreplace) %attr(-,root,heat) %{_sysconfdir}/heat/heat-api-paste.ini
+%{_unitdir}/openstack-heat-api.service
 %{_mandir}/man1/heat-api.1.gz
 
 %post api
-%systemd_post heat-api.service
+%systemd_post openstack-heat-api.service
 
-%preun
-%systemd_preun heat-api.service
+%preun api
+%systemd_preun openstack-heat-api.service
 
-%postun
-%systemd_postun_with_restart heat-api.service
+%postun api
+%systemd_postun_with_restart openstack-heat-api.service
 
 
-%package cfn-api
+%package api-cfn
 Summary: Heat CloudFormation API
 Group: System Environment/Base
 
@@ -193,28 +200,28 @@ Requires(post): systemd
 Requires(preun): systemd
 Requires(postun): systemd
 
-%description cfn-api
+%description api-cfn
 AWS CloudFormation-compatible API to the Heat Engine
 
-%files cfn-api
+%files api-cfn
 %doc README.rst LICENSE doc/build/html/man/heat-api-cfn.html
 %{_bindir}/heat-api-cfn
-%config(noreplace) %attr(-,root,openstack-heat) %{_sysconfdir}/heat/heat-api-cfn.conf
-%config(noreplace) %attr(-,root,openstack-heat) %{_sysconfdir}/heat/heat-api-cfn-paste.ini
-%{_unitdir}/heat-api-cfn.service
+%config(noreplace) %attr(-,root,heat) %{_sysconfdir}/heat/heat-api-cfn.conf
+%config(noreplace) %attr(-,root,heat) %{_sysconfdir}/heat/heat-api-cfn-paste.ini
+%{_unitdir}/openstack-heat-api-cfn.service
 %{_mandir}/man1/heat-api-cfn.1.gz
 
-%post cfn-api
-%systemd_post heat-api-cloudwatch.service
+%post api-cfn
+%systemd_post openstack-heat-api-cloudwatch.service
 
-%preun cfn-api
-%systemd_preun heat-api-cloudwatch.service
+%preun api-cfn
+%systemd_preun openstack-heat-api-cloudwatch.service
 
-%postun cfn-api
-%systemd_postun_with_restart heat-api-cloudwatch.service
+%postun api-cfn
+%systemd_postun_with_restart openstack-heat-api-cloudwatch.service
 
 
-%package cloudwatch-api
+%package api-cloudwatch
 Summary: Heat CloudWatch API
 Group: System Environment/Base
 
@@ -224,47 +231,57 @@ Requires(post): systemd
 Requires(preun): systemd
 Requires(postun): systemd
 
-%description cloudwatch-api
+%description api-cloudwatch
 AWS CloudWatch-compatible API to the Heat Engine
 
-%files cloudwatch-api
+%files api-cloudwatch
 %doc README.rst LICENSE doc/build/html/man/heat-api-cloudwatch.html
 %{_bindir}/heat-api-cloudwatch
-%config(noreplace) %attr(-,root,openstack-heat) %{_sysconfdir}/heat/heat-api-cloudwatch.conf
-%config(noreplace) %attr(-,root,openstack-heat) %{_sysconfdir}/heat/heat-api-cloudwatch-paste.ini
-%{_unitdir}/heat-api-cloudwatch.service
+%config(noreplace) %attr(-,root,heat) %{_sysconfdir}/heat/heat-api-cloudwatch.conf
+%config(noreplace) %attr(-,root,heat) %{_sysconfdir}/heat/heat-api-cloudwatch-paste.ini
+%{_unitdir}/openstack-heat-api-cloudwatch.service
 %{_mandir}/man1/heat-api-cloudwatch.1.gz
 
-%post cloudwatch-api
-%systemd_post heat-api-cfn.service
+%post api-cloudwatch
+%systemd_post openstack-heat-api-cfn.service
 
-%preun cloudwatch-api
-%systemd_preun heat-api-cfn.service
+%preun api-cloudwatch
+%systemd_preun openstack-heat-api-cfn.service
 
-%postun cloudwatch-api
-%systemd_postun_with_restart heat-api-cfn.service
+%postun api-cloudwatch
+%systemd_postun_with_restart openstack-heat-api-cfn.service
 
 
-%package clients
-Summary: Heat clients
+%package cli
+Summary: Heat cli
 Group: System Environment/Base
 
 Requires: %{name}-common = %{version}-%{release}
 
-%description clients
+%description cli
 Heat client tools accessible from the CLI
 
-%files clients
+%files cli
 %doc README.rst LICENSE doc/build/html/man/heat-cfn.html
 %{_bindir}/heat-boto
 %{_bindir}/heat-cfn
 %{_bindir}/heat-watch
 %config(noreplace) %{_sysconfdir}/bash_completion.d/heat-cfn
-%config(noreplace) %attr(-,root,openstack-heat) %{_sysconfdir}/heat/boto.cfg
+%config(noreplace) %attr(-,root,heat) %{_sysconfdir}/heat/boto.cfg
 %{_mandir}/man1/heat-cfn.1.gz
 #%{_mandir}/man1/heat-boto.1.gz
 
 %changelog
+* Mon Mar 11 2013 Steven Dake <sdake@redhat.com> 2013.1-0.5.g3
+- Assign heat user with 167:167
+- Rename packages from *-api to api-*
+- Rename clients to cli
+- change user/gid to heat from openstack-heat
+- use shared state dir macro for shared state
+- Add /etc/heat dir to owned directory list
+- set proper uid/gid for files
+- set proper read/write/execute bits
+
 * Thu Dec 20 2012 Jeff Peeler <jpeeler@redhat.com> 2013.1-2
 - split into subpackages
 
