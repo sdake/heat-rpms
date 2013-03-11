@@ -7,14 +7,14 @@
 
 %global with_doc %{!?_without_doc:1}%{?_without_doc:0}
 
-Name: 		openstack-heat
+Name:		openstack-heat
 Summary:	OpenStack Orchestration (heat)
-Version:        2013.1
-Release:        0.5.%{release_letter}%{milestone}%{?dist}
-License:        ASL 2.0
-Group:          System Environment/Base
-URL:            http://heat-api.org/
-Source0:        http://launchpad.net/heat/%{release_name}/%{version}/+download/heat-%{version}.%{release_letter}%{milestone}.tar.gz
+Version:	2013.1
+Release:	0.5.%{release_letter}%{milestone}%{?dist}
+License:	ASL 2.0
+Group:		System Environment/Base
+URL:		http://heat-api.org/
+Source0:	https://launchpad.net/heat/%{release_name}/%{release_name}-%{milestone}/+download/heat-%{version}.%{release_letter}%{milestone}.tar.gz
 Obsoletes:	heat
 Provides:	heat
 
@@ -271,7 +271,6 @@ Heat client tools accessible from the CLI
 %config(noreplace) %{_sysconfdir}/bash_completion.d/heat-cfn
 %config(noreplace) %attr(-,root,heat) %{_sysconfdir}/heat/boto.cfg
 %{_mandir}/man1/heat-cfn.1.gz
-#%{_mandir}/man1/heat-boto.1.gz
 
 %changelog
 * Mon Mar 11 2013 Steven Dake <sdake@redhat.com> 2013.1-0.5.g3
