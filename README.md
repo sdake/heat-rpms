@@ -1,6 +1,9 @@
 heat-rpms
 =========
 
+(This repository is no longer maintained. For a more up to date spec file,
+please see the files hosted at http://pkgs.fedoraproject.org/cgit)
+
 Repo for creating rpm packaging for the heat projects:
 
 Step 1: Override Makefile variables
